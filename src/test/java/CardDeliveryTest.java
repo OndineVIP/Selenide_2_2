@@ -20,7 +20,7 @@ public class CardDeliveryTest {
     @Test
     void shouldSignCorrect() {
 
-        SelenideElement form = $("[class]");
+        SelenideElement form = $("[form]");
         form.$("[data-test-id=town] input").setValue("Казань");
         form.$("[data-test-id=date] input").setValue("05.07.2023");
         form.$("[data-test-id=name] input").setValue("Петр Иванов");
