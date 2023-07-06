@@ -1,33 +1,33 @@
-import com.codeborne.selenide.SelenideElement;
-import io.github.bonigarcia.wdm.WebDriverManager;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
+import com.codeborne.selenide.Condition;
 import org.junit.jupiter.api.Test;
 
-import static com.codeborne.selenide.Condition.exactText;
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+
+
+import static com.codeborne.selenide.Selectors.withText;
 import static com.codeborne.selenide.Selenide.$;
 import static com.codeborne.selenide.Selenide.open;
 
+
 public class CardDeliveryTest {
-    @BeforeEach
-    void setUp() {
-        open("http://localhost:9999/");
-    }
-    @BeforeAll
-    public static void setupAll() {
-        WebDriverManager.chromedriver().setup();
+    private String generateDate(int addDays, String pattern) {
+        return LocalDate.now().plusDays(addDays).format(DateTimeFormatter.ofPattern(pattern));
     }
     @Test
-    void shouldSignCorrect() {
+    void shouldDeliveryCard() {
+        open("http://localhost:9999");
 
-        SelenideElement form = $("[form]");
-        form.$("[data-test-id=town] input").setValue("Казань");
-        form.$("[data-test-id=date] input").setValue("05.07.2023");
-        form.$("[data-test-id=name] input").setValue("Петр Иванов");
-        form.$("[data-test-id=phone] input").setValue("+79000000000");
-        form.$("agreement").click();
-        form.$("button_book").click();
-        $("[data-test-id=order-success]").shouldHave(exactText("Успешно! Встреча успешно забронирована на 05.07.2023"));
-
+        $("[data-test-id='city'] input").setValue("Казань");
+        $("[data-test-id='date'] input").doubleClick().sendKeys(generateDate(4, "dd.MM.yyyy"));
+        $("[data-test-id='name'] input").setValue("Ахматова Анна");
+        $("[data-test-id='phone'] input").setValue("+79011122333");
+        $(withText("Успешно")).shouldBe(Condition.hidden);
+        $("[data-test-id='agreement']").click();
+        $(".button").click();
+        $("[data-test-id=notification]").shouldBe(Condition.visible, Duration.ofSeconds(10));
+        $("[data-test-id=notification]").shouldHave(Condition.text("Успешно!\n" +
+                "Встреча успешно забронирована на " + generateDate(4, "dd.MM.yyyy"))).shouldBe(Condition.visible);
     }
 }
